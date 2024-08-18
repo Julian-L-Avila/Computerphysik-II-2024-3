@@ -1,15 +1,31 @@
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 #include <memory>
-#include <exception>
 #include <cmath>
 #include <algorithm>
+
+bool GetValidNumber(std::string& input, double& a, double& previousResult) {
+	while (true) {
+		std::cin >> input;
+		if (input == "ans") {
+			a = previousResult;
+			return true;
+		} else {
+			std::istringstream iss(input);
+			if (iss >> a) {
+				return true;
+			}
+		}
+		std::cout << "Invalid input. Please enter a number or 'ans': ";
+	}
+}
 
 class Operation {
 public:
 	virtual int ArgumentsNumber() const = 0;
-	virtual double Calculate(double a, double b=0) const = 0;
+	virtual double Calculate(double a, double b=0, double c=0) const = 0;
 	virtual std::string Name() const = 0;
 	virtual ~Operation() = default;
 };
@@ -26,61 +42,61 @@ public:
 
 class Sum : public BinaryOperation {
 public:
-	double Calculate(double a, double b) const override { return a + b; }
+	double Calculate(double a, double b, double c=0) const override { return a + b; }
 	std::string Name() const override { return "Sum: a+b"; }
 };
 
 class Subtraction : public BinaryOperation {
 public:
-	double Calculate(double a, double b) const override { return a - b; }
+	double Calculate(double a, double b, double c=0) const override { return a - b; }
 	std::string Name() const override { return "Subtraction: a-b"; }
 };
 
 class Product : public BinaryOperation {
 public:
-	double Calculate(double a, double b) const override { return a * b; }
+	double Calculate(double a, double b, double c=0) const override { return a * b; }
 	std::string Name() const override { return "Product: ab"; }
 };
 
 class Division : public BinaryOperation {
 public:
-	double Calculate(double a, double b) const override { return a / b; }
+	double Calculate(double a, double b, double c=0) const override { return a / b; }
 	std::string Name() const override { return "Division: a/b"; }
 };
 
 class Absolute : public UnaryOperation {
 public:
-	double Calculate(double a, double b) const override { return std::abs(a); }
+	double Calculate(double a, double b, double c=0) const override { return std::abs(a); }
 	std::string Name() const override { return "Absolute value: |a|"; }
 };
 
 class Power: public BinaryOperation {
 public:
-	double Calculate(double a, double b) const override { return std::pow(a, b); }
+	double Calculate(double a, double b, double c=0) const override { return std::pow(a, b); }
 	std::string Name() const override { return "nth Power: a^b"; }
 };
 
 class Root: public BinaryOperation {
 public:
-	double Calculate(double a, double b) const override { return std::pow(a, 1/b); }
+	double Calculate(double a, double b, double c=0) const override { return std::pow(a, 1/b); }
 	std::string Name() const override { return "nth Root: a^(1/b)"; }
 };
 
 class Exp: public UnaryOperation {
 public:
-	double Calculate(double a, double b=0) const override { return std::exp(a); }
+	double Calculate(double a, double b=0, double c=0) const override { return std::exp(a); }
 	std::string Name() const override { return "Exponential: e^(a)"; }
 };
 
 class NaturalLog: public UnaryOperation {
 public:
-	double Calculate(double a, double b=0) const override { return std::log(a); }
+	double Calculate(double a, double b=0, double c=0) const override { return std::log(a); }
 	std::string Name() const override { return "Natural log: log(a)"; }
 };
 
 class Log: public BinaryOperation {
 public:
-	double Calculate(double base, double a) const override {
+	double Calculate(double base, double a, double c=0) const override {
 		return std::log(a) / std::log(base);
 	}
 	std::string Name() const override { return "Log base a: log_a(b)"; }
@@ -88,25 +104,25 @@ public:
 
 class Sine: public UnaryOperation {
 public:
-	double Calculate(double a, double b=0) const override { return std::sin(a); }
+	double Calculate(double a, double b=0, double c=0) const override { return std::sin(a); }
 	std::string Name() const override { return "Sine: sin(a)"; }
 };
 
 class Cosine: public UnaryOperation {
 public:
-	double Calculate(double a, double b=0) const override { return std::cos(a); }
+	double Calculate(double a, double b=0, double c=0) const override { return std::cos(a); }
 	std::string Name() const override { return "Cosine: cos(a)"; }
 };
 
 class Tangent: public UnaryOperation {
 public:
-	double Calculate(double a, double b=0) const override { return std::tan(a); }
+	double Calculate(double a, double b=0, double c=0) const override { return std::tan(a); }
 	std::string Name() const override { return "Tangent: tan(a)"; }
 };
 
 class Factorial: public UnaryOperation {
 public:
-	double Calculate(double a, double b=0) const override { return std::tgamma(a + 1); }
+	double Calculate(double a, double b=0, double c=0) const override { return std::tgamma(a + 1); }
 	std::string Name() const override { return "Factorial: a!"; }
 };
 
@@ -138,18 +154,28 @@ public:
 		std::cout << "Exit with any other key\n";
 	}
 
-	void Run(int ch, double a, double b) {
-		if (ch < 1 || ch > operations.size()) {
-			throw std::invalid_argument("Invalid input");
-		}
-		std::cout << "Insert two numbers:\na = ";
-		std::cin >> a;
+	void Run(int& ch, double& a, double& b, double& c) {
+		double previousResult = 0;
+		while (true) {
+			std::string input;
+			Menu();
+			std::cin >> ch;
 
-		if (operations[ch - 1] -> ArgumentsNumber() == 2) {
-			std::cout << "b = ";
-			std::cin >> b;
-		}
-		std::cout << "Result = " << operations[ch - 1] -> Calculate(a, b) << '\n';
+			if (ch > operations.size()) {
+				throw std::invalid_argument("Invalid input");
+			}
+
+			std::cout << "Insert number:\na = ";
+			GetValidNumber(input, a, previousResult);
+
+			if (operations[ch - 1] -> ArgumentsNumber() > 1) {
+				std::cout << "Insert number:\nb = ";
+				GetValidNumber(input, b, previousResult);
+			}
+
+			previousResult = operations[ch - 1] -> Calculate(a, b, c);
+			std::cout << "Result = " << previousResult << '\n';
+		};
 	}
 
 private:
@@ -159,21 +185,8 @@ private:
 int main() {
 	Calculator calc;
 	int ch;
-	double a,b;
+	double a, b, c;
 
-	while (true) {
-		calc.Menu();
-		std::cin >> ch;
-
-		if (ch == 0) {
-			break;
-		}
-
-	try {
-		calc.Run(ch, a, b);
-	} catch (const std::exception& e) {
-		std::cerr << e.what() << '\n';
-	}
-	}
+	calc.Run(ch, a, b, c);
 	std::cout << "Thanks for using.\nBye Bye." << std::endl;
 }
