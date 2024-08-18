@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdlib>
 #include <stdexcept>
 #include <vector>
 #include <memory>
@@ -9,69 +8,106 @@
 
 class Operation {
 public:
-	const int argumentsNumber = 2;
-	virtual double Calculate(double a, double b) = 0;
+	virtual int ArgumentsNumber() const = 0;
+	virtual double Calculate(double a, double b=0) const = 0;
 	virtual std::string Name() const = 0;
-
 	virtual ~Operation() = default;
 };
 
-class Sum : public Operation {
+class BinaryOperation : public Operation {
 public:
-	double Calculate(double a, double b) override { return a + b; }
-	std::string Name() const override { return "Sum: a + b"; }
+	int ArgumentsNumber() const override { return 2; }
 };
 
-class Subtraction : public Operation {
+class UnaryOperation : public Operation {
 public:
-	double Calculate(double a, double b) override { return a - b; }
-	std::string Name() const override { return "Subtraction: a - b"; }
+	int ArgumentsNumber() const override {return 1; }
 };
 
-class Product : public Operation {
+class Sum : public BinaryOperation {
 public:
-	double Calculate(double a, double b) override { return a * b; }
+	double Calculate(double a, double b) const override { return a + b; }
+	std::string Name() const override { return "Sum: a+b"; }
+};
+
+class Subtraction : public BinaryOperation {
+public:
+	double Calculate(double a, double b) const override { return a - b; }
+	std::string Name() const override { return "Subtraction: a-b"; }
+};
+
+class Product : public BinaryOperation {
+public:
+	double Calculate(double a, double b) const override { return a * b; }
 	std::string Name() const override { return "Product: ab"; }
 };
 
-class Division : public Operation {
+class Division : public BinaryOperation {
 public:
-	double Calculate(double a, double b) override { return a / b; }
-	std::string Name() const override { return "Division: a / b"; }
+	double Calculate(double a, double b) const override { return a / b; }
+	std::string Name() const override { return "Division: a/b"; }
 };
 
-class Power: public Operation {
+class Absolute : public UnaryOperation {
 public:
-	double Calculate(double a, double b) override { return std::pow(a, b); }
-	std::string Name() const override { return "nth Power: a ^ b"; }
+	double Calculate(double a, double b) const override { return std::abs(a); }
+	std::string Name() const override { return "Absolute value: |a|"; }
 };
 
-class Root: public Operation {
+class Power: public BinaryOperation {
 public:
-	double Calculate(double a, double b) override { return std::pow(a, 1/b); }
-	std::string Name() const override { return "nth Root: a ^ (1/b)"; }
+	double Calculate(double a, double b) const override { return std::pow(a, b); }
+	std::string Name() const override { return "nth Power: a^b"; }
 };
 
-class Exp: public Operation {
+class Root: public BinaryOperation {
 public:
-	const int argumentsNumber = 1;
-	double Calculate(double a, double b) override { return std::exp(a); }
-	std::string Name() const override { return "Exponential: e ^ (a)"; }
+	double Calculate(double a, double b) const override { return std::pow(a, 1/b); }
+	std::string Name() const override { return "nth Root: a^(1/b)"; }
 };
 
-class NaturalLog: public Operation {
+class Exp: public UnaryOperation {
 public:
-	const int argumentsNumber = 1;
-	double Calculate(double a, double b) override { return std::log(a); }
+	double Calculate(double a, double b=0) const override { return std::exp(a); }
+	std::string Name() const override { return "Exponential: e^(a)"; }
+};
+
+class NaturalLog: public UnaryOperation {
+public:
+	double Calculate(double a, double b=0) const override { return std::log(a); }
 	std::string Name() const override { return "Natural log: log(a)"; }
 };
 
-class Log: public Operation {
+class Log: public BinaryOperation {
 public:
-	double Calculate(double base, double a) override {
+	double Calculate(double base, double a) const override {
 		return std::log(a) / std::log(base);
 	}
 	std::string Name() const override { return "Log base a: log_a(b)"; }
+};
+
+class Sine: public UnaryOperation {
+public:
+	double Calculate(double a, double b=0) const override { return std::sin(a); }
+	std::string Name() const override { return "Sine: sin(a)"; }
+};
+
+class Cosine: public UnaryOperation {
+public:
+	double Calculate(double a, double b=0) const override { return std::cos(a); }
+	std::string Name() const override { return "Cosine: cos(a)"; }
+};
+
+class Tangent: public UnaryOperation {
+public:
+	double Calculate(double a, double b=0) const override { return std::tan(a); }
+	std::string Name() const override { return "Tangent: tan(a)"; }
+};
+
+class Factorial: public UnaryOperation {
+public:
+	double Calculate(double a, double b=0) const override { return std::tgamma(a + 1); }
+	std::string Name() const override { return "Factorial: a!"; }
 };
 
 class Calculator {
@@ -81,6 +117,16 @@ public:
 		operations.push_back(std::make_unique<Subtraction>());
 		operations.push_back(std::make_unique<Product>());
 		operations.push_back(std::make_unique<Division>());
+		operations.push_back(std::make_unique<Absolute>());
+		operations.push_back(std::make_unique<Power>());
+		operations.push_back(std::make_unique<Root>());
+		operations.push_back(std::make_unique<Exp>());
+		operations.push_back(std::make_unique<NaturalLog>());
+		operations.push_back(std::make_unique<Log>());
+		operations.push_back(std::make_unique<Sine>());
+		operations.push_back(std::make_unique<Cosine>());
+		operations.push_back(std::make_unique<Tangent>());
+		operations.push_back(std::make_unique<Factorial>());
 	}
 
 	void Menu() const {
@@ -89,12 +135,19 @@ public:
 		std::for_each(operations.begin(), operations.end(), [&](const auto& op) {
 			std::cout << optionNumber++ << ". " << op -> Name() << '\n';
 		});
-		std::cout << "0. Exit\n";
+		std::cout << "Exit with any other key\n";
 	}
 
 	void Run(int ch, double a, double b) {
 		if (ch < 1 || ch > operations.size()) {
 			throw std::invalid_argument("Invalid input");
+		}
+		std::cout << "Insert two numbers:\na = ";
+		std::cin >> a;
+
+		if (operations[ch - 1] -> ArgumentsNumber() == 2) {
+			std::cout << "b = ";
+			std::cin >> b;
 		}
 		std::cout << "Result = " << operations[ch - 1] -> Calculate(a, b) << '\n';
 	}
@@ -114,13 +167,7 @@ int main() {
 
 		if (ch == 0) {
 			break;
-	}
-
-	std::cout << "Insert two numbers:\n";
-	std::cout << "a = ";
-	std::cin >> a;
-	std::cout << "b = ";
-	std::cin >> b;
+		}
 
 	try {
 		calc.Run(ch, a, b);
