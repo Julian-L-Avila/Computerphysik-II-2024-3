@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <iostream>
 #include <cstdlib>
 #include <stdexcept>
@@ -6,9 +5,11 @@
 #include <memory>
 #include <exception>
 #include <cmath>
+#include <algorithm>
 
 class Operation {
 public:
+	const int argumentsNumber = 2;
 	virtual double Calculate(double a, double b) = 0;
 	virtual std::string Name() const = 0;
 
@@ -51,6 +52,28 @@ public:
 	std::string Name() const override { return "nth Root: a ^ (1/b)"; }
 };
 
+class Exp: public Operation {
+public:
+	const int argumentsNumber = 1;
+	double Calculate(double a, double b) override { return std::exp(a); }
+	std::string Name() const override { return "Exponential: e ^ (a)"; }
+};
+
+class NaturalLog: public Operation {
+public:
+	const int argumentsNumber = 1;
+	double Calculate(double a, double b) override { return std::log(a); }
+	std::string Name() const override { return "Natural log: log(a)"; }
+};
+
+class Log: public Operation {
+public:
+	double Calculate(double base, double a) override {
+		return std::log(a) / std::log(base);
+	}
+	std::string Name() const override { return "Log base a: log_a(b)"; }
+};
+
 class Calculator {
 public:
 	Calculator() {
@@ -64,7 +87,7 @@ public:
 		std::cout << "Choose an operation:\n";
 		int optionNumber = 1;
 		std::for_each(operations.begin(), operations.end(), [&](const auto& op) {
-			std::cout << optionNumber++ << ". " << op -> Name() << std::endl;
+			std::cout << optionNumber++ << ". " << op -> Name() << '\n';
 		});
 		std::cout << "0. Exit\n";
 	}
