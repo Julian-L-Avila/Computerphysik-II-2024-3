@@ -8,23 +8,14 @@
 bool GetValidNumber(std::string& input, double& a, double& previousResult) {
 	while (true) {
 		std::cin >> input;
-		if (input == "pi") {
-			a = M_PI;
-			return true;
-		}
-		if (input == "e") {
-			a = M_E;
-			return true;
-		}
-		if (input == "ans") {
-			a = previousResult;
-			return true;
-		}
+		if (input == "pi") { a = M_PI; return true; }
+		if (input == "e") { a = M_E; return true; }
+		if (input == "ans") { a = previousResult; return true; }
 		std::istringstream iss(input);
 		if (iss >> a) {
 				return true;
 		}
-		std::cout << "Invalid input. Please enter a number or 'ans': ";
+		std::cout << "Invalid input. Please enter a number or 'ans': " << std::endl;
 	}
 }
 
