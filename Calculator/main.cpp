@@ -56,7 +56,7 @@ Opp Div(num1, num2, num1 / num2);
 			std::cout << "Bye Bye" << '\n';
 			std::cout << "Made by Julian L. Avila" << std::endl;
 			exit(2);
-    }
+  }
 
 	return 0;
 }

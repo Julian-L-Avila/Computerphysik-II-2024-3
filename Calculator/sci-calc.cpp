@@ -61,6 +61,12 @@ DEFINE_OPERATION_CLASS(Log, UnaryOperation, std::log(b) / std::log(a),
 DEFINE_OPERATION_CLASS(Sine, UnaryOperation, std::sin(a), "Sine: sin(a)")
 DEFINE_OPERATION_CLASS(Cosine, UnaryOperation, std::cos(a), "Cosine: cos(a)")
 DEFINE_OPERATION_CLASS(Tangent, UnaryOperation, std::tan(a), "Tangent: tan(a)")
+DEFINE_OPERATION_CLASS(Arcsine, UnaryOperation, std::asin(a),
+		"Arcsine: arcsin(a)")
+DEFINE_OPERATION_CLASS(Arccosine, UnaryOperation, std::acos(a),
+		"Arccosine: arccos(a)")
+DEFINE_OPERATION_CLASS(Arctangent, UnaryOperation, std::atan(a),
+		"Arctangent: arctan(a)")
 DEFINE_OPERATION_CLASS(Factorial, UnaryOperation, std::tgamma(a + 1),
 	"Factorial: a!")
 
