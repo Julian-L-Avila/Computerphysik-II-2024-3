@@ -108,7 +108,7 @@ DEFINE_OPERATION_CLASS(Factorial, UnaryOperation, std::tgamma(a + 1),
 class LinearSolver : public BinaryOperation {
 public:
 	double Calculate(double a, double b, double c=0) const override {
-		if (a == 0 || b == 0) {
+		if (a == 0) {
 			throw std::invalid_argument{"There is no equation to be solve."};
 		}
 		return -a / b;
