@@ -108,10 +108,8 @@ DEFINE_OPERATION_CLASS(Factorial, UnaryOperation, std::tgamma(a + 1),
 class LinearSolver : public BinaryOperation {
 public:
 	double Calculate(double a, double b, double c=0) const override {
-		if (a == 0) {
-			throw std::invalid_argument{"There is no equation to be solve."};
-		}
-		return -a / b;
+		if (a == 0) throw std::invalid_argument{"There is no equation to be solve."};
+		return -b / a;
 	}
 
 	std::string Name() const override { return "Solve linear: ax + b = 0"; }
@@ -126,18 +124,18 @@ public:
 			throw std::invalid_argument{"There is no equation to be solve."};
 		}
 		if (a == 0) {
-			return -b / c;
+			return -c / b;
 		}
 		if (discriminant < 0) {
 			throw std::invalid_argument{"The equation has no real solutions."};
 		} else if (discriminant == 0) {
 			return -b / (2 * a);
-		} else {
-			std::cout << "Solution 1: " << (-b + std::sqrt(discriminant)) / (2 * a)
-				<< '\n' << "Solution 2: " << (-b - std::sqrt(discriminant)) / (2 * a)
-				<< '\n';
-			return (-b + std::sqrt(discriminant)) / (2 * a);
 		}
+
+		std::cout << "Solution 1: " << (-b + std::sqrt(discriminant)) / (2 * a)
+			<< '\n' << "Solution 2: " << (-b - std::sqrt(discriminant)) / (2 * a)
+			<< '\n';
+		return (-b + std::sqrt(discriminant)) / (2 * a);
 	}
 
 	std::string Name() const override { return "Solve quadratic: ax² + bx + c = 0";}
