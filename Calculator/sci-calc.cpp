@@ -122,7 +122,7 @@ class QuadraticSolver : public TernaryOperation {
 public:
 	double Calculate(double a, double b, double c) const override {
 		double discriminant = b * b - 4 * a * c;
-		if (a == 0 || b == 0) {
+		if (a == 0 && b == 0) {
 			throw std::invalid_argument{"There is no equation to be solve."};
 		}
 		if (a == 0) {
@@ -130,8 +130,14 @@ public:
 		}
 		if (discriminant < 0) {
 			throw std::invalid_argument{"The equation has no real solutions."};
+		} else if (discriminant == 0) {
+			return -b / (2 * a);
+		} else {
+			std::cout << "Solution 1: " << (-b + std::sqrt(discriminant)) / (2 * a)
+				<< '\n' << "Solution 2: " << (-b - std::sqrt(discriminant)) / (2 * a)
+				<< '\n';
+			return (-b + std::sqrt(discriminant)) / (2 * a);
 		}
-		return (-b + std::sqrt(discriminant)) / (2 * a);
 	}
 
 	std::string Name() const override { return "Solve quadratic: ax² + bx + c = 0";}
@@ -194,10 +200,10 @@ public:
 
 				if (operations[ch] -> ArgumentsNumber() == 3) {
 					prompt = "Enter value for c: ";
-					GetValidNumber(prompt, b, previousResult);
+					GetValidNumber(prompt, c, previousResult);
 				}
 
-				previousResult = operations[ch] -> Calculate(a, b);
+				previousResult = operations[ch] -> Calculate(a, b, c);
 				std::cout << "Result = " << previousResult << '\n';
 			} catch (const std::invalid_argument& e) {
 				std::cout << e.what() << '\n';
