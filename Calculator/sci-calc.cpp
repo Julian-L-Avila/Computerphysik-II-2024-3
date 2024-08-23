@@ -1,3 +1,8 @@
+/* Scientific Calculator made by Julian L. Avila
+ * jlavilam@udistrital.edu.co
+ * julianlavilam@gmail.com
+ */
+
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
