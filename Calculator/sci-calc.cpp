@@ -24,6 +24,7 @@ public:
 	virtual int ArgumentsNumber() const = 0;
 	virtual double Calculate(double a, double b=0, double c=0) const = 0;
 	virtual std::string Name() const = 0;
+	virtual std::string Category() const = 0;
 	virtual ~Operation() = default;
 };
 
@@ -37,38 +38,59 @@ public:
 	int ArgumentsNumber() const override {return 1; }
 };
 
-#define DEFINE_OPERATION_CLASS(NAME, BASE, FUNC, DESC) \
+#define DEFINE_OPERATION_CLASS(NAME, BASE, FUNC, DESC, CAT) \
 class NAME : public BASE { \
 public: \
 	double Calculate(double a, double b=0, double c=0) const override { return FUNC; } \
 	std::string Name() const override { return DESC; } \
+	std::string Category() const override {return CAT; } \
 };
 
-DEFINE_OPERATION_CLASS(Sum, BinaryOperation, a + b, "Sum a + b")
+DEFINE_OPERATION_CLASS(Sum, BinaryOperation, a + b, "Sum: a + b",
+		"Basic Arithmetic")
 DEFINE_OPERATION_CLASS(Subtraction, BinaryOperation, a - b,
-	"Subtraction: a - b")
-DEFINE_OPERATION_CLASS(Product, BinaryOperation, a * b, "Product: a * b")
-DEFINE_OPERATION_CLASS(Division, BinaryOperation, a / b, "Division: a / b")
-DEFINE_OPERATION_CLASS(Absolute, UnaryOperation, std::abs(a),
-	"Absolute value: |a|")
-DEFINE_OPERATION_CLASS(Power, BinaryOperation, std::pow(a, b), "Power: a^b")
-DEFINE_OPERATION_CLASS(Root, BinaryOperation, std::pow(a, 1/b), "Root: a^(1/b)")
-DEFINE_OPERATION_CLASS(Exp, UnaryOperation, std::exp(a), "Exponential: e^a")
-DEFINE_OPERATION_CLASS(NaturalLog, UnaryOperation, std::log(a),
-	"Natural log: ln(a)")
-DEFINE_OPERATION_CLASS(Log, UnaryOperation, std::log(b) / std::log(a),
-	"Log base a: log_a(b)")
-DEFINE_OPERATION_CLASS(Sine, UnaryOperation, std::sin(a), "Sine: sin(a)")
-DEFINE_OPERATION_CLASS(Cosine, UnaryOperation, std::cos(a), "Cosine: cos(a)")
-DEFINE_OPERATION_CLASS(Tangent, UnaryOperation, std::tan(a), "Tangent: tan(a)")
+		"Subtraction: a - b", "Basic Arithmetic")
+DEFINE_OPERATION_CLASS(Product, BinaryOperation, a * b, "Product: a * b",
+		"Basic Arithmetic")
+DEFINE_OPERATION_CLASS(Division, BinaryOperation, a / b, "Division: a / b",
+		"Basic Arithmetic")
+
+DEFINE_OPERATION_CLASS(Sine, UnaryOperation, std::sin(a), "Sine: sin(a)",
+		"Trigonometric Functions")
+DEFINE_OPERATION_CLASS(Cosine, UnaryOperation, std::cos(a), "Cosine: cos(a)",
+		"Trigonometric Functions")
+DEFINE_OPERATION_CLASS(Tangent, UnaryOperation, std::tan(a), "Tangent: tan(a)",
+		"Trigonometric Functions")
+
 DEFINE_OPERATION_CLASS(Arcsine, UnaryOperation, std::asin(a),
-		"Arcsine: arcsin(a)")
+		"Arcsine: arcsin(a)", "Inverse Trigonometric Functions")
 DEFINE_OPERATION_CLASS(Arccosine, UnaryOperation, std::acos(a),
-		"Arccosine: arccos(a)")
+		"Arccosine: arccos(a)", "Inverse Trigonometric Functions")
 DEFINE_OPERATION_CLASS(Arctangent, UnaryOperation, std::atan(a),
-		"Arctangent: arctan(a)")
+		"Arctangent: arctan(a)", "Inverse Trigonometric Functions")
+
+DEFINE_OPERATION_CLASS(Sinh, UnaryOperation, std::sinh(a),
+		"Hyperbolic sine: sinh(a)", "Hyperbolic Functions")
+DEFINE_OPERATION_CLASS(Cosh, UnaryOperation, std::cosh(a),
+		"Hyperbolic cosine: cosh(a)", "Hyperbolic Functions")
+DEFINE_OPERATION_CLASS(Tanh, UnaryOperation, std::tanh(a),
+		"Hyperbolic tangent: tanh(a)", "Hyperbolic Functions")
+
+DEFINE_OPERATION_CLASS(NaturalLog, UnaryOperation, std::log(a),
+		"Natural log: ln(a)", "Logarithmic Functions")
+DEFINE_OPERATION_CLASS(Log10, UnaryOperation, std::log10(a),
+		"Base-10 log: log10(a)", "Logarithmic Functions")
+
+DEFINE_OPERATION_CLASS(Absolute, UnaryOperation, std::abs(a),
+		"Absolute value: |a|", "Miscellaneous")
+DEFINE_OPERATION_CLASS(Power, BinaryOperation, std::pow(a, b), "Power: a^b",
+		"Miscellaneous")
+DEFINE_OPERATION_CLASS(Root, BinaryOperation, std::pow(a, 1/b), "Root: a^(1/b)",
+		"Miscellaneous")
+DEFINE_OPERATION_CLASS(Exp, UnaryOperation, std::exp(a), "Exponential: e^(a)",
+		"Miscellaneous")
 DEFINE_OPERATION_CLASS(Factorial, UnaryOperation, std::tgamma(a + 1),
-	"Factorial: a!")
+		"Factorial: a!", "Miscellaneous")
 
 class Calculator {
 public:
@@ -86,6 +108,9 @@ public:
 		operations.emplace_back(std::make_unique<Sine>());
 		operations.emplace_back(std::make_unique<Cosine>());
 		operations.emplace_back(std::make_unique<Tangent>());
+		operations.emplace_back(std::make_unique<Arcsine>());
+		operations.emplace_back(std::make_unique<Arccosine>());
+		operations.emplace_back(std::make_unique<Arctangent>());
 		operations.emplace_back(std::make_unique<Factorial>());
 	}
 
