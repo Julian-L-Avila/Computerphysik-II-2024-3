@@ -114,9 +114,10 @@ public:
 		return -a / b;
 	}
 
-	std::string Name() const override { return "Solve linear: ax + b = 0";}
+	std::string Name() const override { return "Solve linear: ax + b = 0"; }
 	std::string Category() const override { return "Equation Solvers"; }
 };
+
 class QuadraticSolver : public TernaryOperation {
 public:
 	double Calculate(double a, double b, double c) const override {
@@ -183,7 +184,7 @@ public:
 				double b = 0;
 				double c = 0;
 
-				std::prompt = "Enter value for a: ";
+				std::string prompt = "Enter value for a: ";
 				GetValidNumber(prompt, a, previousResult);
 
 				if (operations[ch] -> ArgumentsNumber() > 1) {
@@ -194,6 +195,7 @@ public:
 				if (operations[ch] -> ArgumentsNumber() == 3) {
 					prompt = "Enter value for c: ";
 					GetValidNumber(prompt, b, previousResult);
+				}
 
 				previousResult = operations[ch] -> Calculate(a, b);
 				std::cout << "Result = " << previousResult << '\n';
