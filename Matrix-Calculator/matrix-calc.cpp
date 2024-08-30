@@ -9,6 +9,11 @@ class Matrix {
 			if (rows <= 0 || cols <= 0 || rows > kMax || cols > kMax) {
 				throw std::out_of_range("Invalid matrix dimensions.");
 			}
+			for (int i = 0; i < rows; ++i) {
+				for (int j = 0; j < cols; ++j) {
+					matrix_[i][j] = 0;
+				}
+			}
 		}
 
 		void Input() {
@@ -73,7 +78,6 @@ class Matrix {
 			Matrix result(rows_, other.cols_);
 			for (int i = 0; i < rows_; ++i) {
 				for (int j = 0; j < other.cols_; ++j) {
-					result.matrix_[i][j] = 0;
 					for (int k = 0; k < cols_; ++k) {
 						result.matrix_[i][j] += matrix_[i][k] * other.matrix_[k][j];
 					}
