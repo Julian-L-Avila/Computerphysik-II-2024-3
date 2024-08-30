@@ -122,7 +122,7 @@ class Matrix {
 			}
 		}
 
-		int matrix_[kMax][kMax];
+		double matrix_[kMax][kMax];
 		int rows_, cols_;
 };
 
