@@ -33,19 +33,6 @@ class Matrix {
 			return rows_ == cols_;
 		}
 
-		Matrix SubMatrix(int exclude_row, int exclude_col) const {
-			Matrix submatrix(rows_ - 1, cols_ - 1);
-			for (int i = 0, sub_i = 0; i < rows_; ++i) {
-				if (i == exclude_row) continue;
-				for (int j = 0, sub_j = 0; j < cols_; ++j) {
-					if (j == exclude_col) continue;
-					submatrix.matrix_[sub_i][sub_j++] = matrix_[i][j];
-				}
-				++sub_i;
-			}
-			return submatrix;
-		}
-
 		Matrix ScalarProduct(double scalar) const {
 			Matrix result(rows_, cols_);
 			for (int i = 0; i < rows_; ++i) {
