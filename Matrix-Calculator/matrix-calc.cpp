@@ -29,12 +29,21 @@ class Matrix {
 			}
 		}
 
-		bool HaveSameDimensions(const Matrix& other) const {
-			return rows_ == other.rows_ && cols_ == other.cols_;
+		bool IsSquare() const {
+			return rows_ == cols_;
 		}
 
-		bool CanMultiply(const Matrix& other) const {
-			return cols_ == other.rows_;
+		Matrix SubMatrix(int exclude_row, int exclude_col) const {
+			Matrix submatrix(rows_ - 1, cols_ - 1);
+			for (int i = 0, sub_i = 0; i < rows_; ++i) {
+				if (i == exclude_row) continue;
+				for (int j = 0, sub_j = 0; j < cols_; ++j) {
+					if (j == exclude_col) continue;
+					submatrix.matrix_[sub_i][sub_j++] = matrix_[i][j];
+				}
+				++sub_i;
+			}
+			return submatrix;
 		}
 
 		Matrix ScalarProduct(double scalar) const {
@@ -48,10 +57,7 @@ class Matrix {
 		}
 
 		Matrix Add(const Matrix& other) const {
-			if (!HaveSameDimensions(other)) {
-				throw std::invalid_argument("Matrices must have the same dimensions for addition.");
-			}
-
+			CheckSameDimensions(other);
 			Matrix result(rows_, cols_);
 			for (int i = 0; i < rows_; ++i) {
 				for (int j = 0; j < cols_; ++j) {
@@ -62,10 +68,7 @@ class Matrix {
 		}
 
 		Matrix Subtract(const Matrix& other) const {
-			if (!HaveSameDimensions(other)) {
-				throw std::invalid_argument("Matrices must have the same dimensions for subtraction.");
-			}
-
+			CheckSameDimensions(other);
 			Matrix result(rows_, cols_);
 			for (int i = 0; i < rows_; ++i) {
 				for (int j = 0; j < cols_; ++j) {
@@ -76,7 +79,7 @@ class Matrix {
 		}
 
 		Matrix Multiply(const Matrix& other) const {
-			if (!CanMultiply(other)) {
+			if (cols_ != other.rows_) {
 				throw std::invalid_argument("Invalid matrix dimensions for multiplication.");
 			}
 
@@ -93,10 +96,7 @@ class Matrix {
 		}
 
 		Matrix MultiplyHadamard(const Matrix& other) const {
-			if (!HaveSameDimensions(other)) {
-				throw std::invalid_argument("Matrices must have the same dimensions for Hadamard product.");
-			}
-
+			CheckSameDimensions(other);
 			Matrix result(rows_, cols_);
 			for (int i = 0; i < rows_; ++i) {
 				for (int j = 0; j < cols_; ++j) {
@@ -107,16 +107,34 @@ class Matrix {
 		}
 
 		Matrix Transpose() const {
-			Matrix result(rows_, cols_);
+			Matrix result(cols_, rows_);
 			for (int i = 0; i < rows_; ++i) {
 				for (int j = 0; j < cols_; ++j) {
-					result.matrix_[i][j] = matrix_[j][i];
+					result.matrix_[j][i] = matrix_[i][j];
 				}
 			}
 			return result;
 		}
 
+		double Trace() const {
+			if (!IsSquare()) {
+				throw std::invalid_argument("Trace is only defined for square matrices.");
+			}
+
+			double trace = 0;
+			for (int i = 0; i < rows_; ++i) {
+				trace += matrix_[i][i];
+			}
+			return trace;
+		}
+
 	private:
+		void CheckSameDimensions(const Matrix& other) const {
+			if (rows_ != other.rows_ || cols_ != other.cols_) {
+				throw std::invalid_argument("Matrices must have the same dimensions.");
+			}
+		}
+
 		int matrix_[kMax][kMax];
 		int rows_, cols_;
 };
@@ -129,46 +147,41 @@ class MatrixCalculator {
 				PerformOperation(operation);
 			}
 		}
+
 	private:
-		char DisplayMenu() {
+		char DisplayMenu() const {
 			std::cout << "Matrix Calculator\n"
 				<< "a. Add\n"
 				<< "s. Subtract\n"
 				<< "m. Multiply\n"
 				<< "h. Hadamard Multiply\n"
 				<< "p. Scalar Product\n"
+				<< "t. Transpose\n"
+				<< "r. Trace\n"
 				<< "q. Quit\n"
 				<< "Choose an operation: ";
-		char operation;
-		std::cin >> operation;
-		return operation;
+			char operation;
+			std::cin >> operation;
+			return operation;
 		}
 
 		void PerformOperation(char operation) {
 			Matrix matrix1 = GetMatrixInput();
-			Matrix result = HandleOperation(operation, matrix1);
-			result.Display();
-		}
-
-		Matrix HandleOperation(char operation, Matrix& matrix1) {
 			switch (operation) {
-				case 'a':
-					return matrix1.Add(GetMatrixInput());
-				case 's':
-					return matrix1.Subtract(GetMatrixInput());
-				case 'm':
-					return matrix1.Multiply(GetMatrixInput());
-				case 'h':
-					return matrix1.MultiplyHadamard(GetMatrixInput());
+				case 'a': matrix1.Add(GetMatrixInput()).Display(); break;
+				case 's': matrix1.Subtract(GetMatrixInput()).Display(); break;
+				case 'm': matrix1.Multiply(GetMatrixInput()).Display(); break;
+				case 'h': matrix1.MultiplyHadamard(GetMatrixInput()).Display(); break;
 				case 'p': {
-					double scalar;
-					std::cout << "Enter scalar: ";
-					std::cin >> scalar;
-					return matrix1.ScalarProduct(scalar);
-				}
-				default:
-					std::cout << "Invalid operation.\n";
-					return matrix1;
+										double scalar;
+										std::cout << "Enter scalar: ";
+										std::cin >> scalar;
+										matrix1.ScalarProduct(scalar).Display();
+										break;
+									}
+				case 't': matrix1.Transpose().Display(); break;
+				case 'r': matrix1.Trace(); break;
+				default: std::cout << "Invalid operation.\n"; break;
 			}
 		}
 
