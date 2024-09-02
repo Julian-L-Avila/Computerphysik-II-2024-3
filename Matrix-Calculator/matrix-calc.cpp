@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
 
 constexpr int kMax = 10;
 
@@ -119,12 +120,90 @@ class Matrix {
 			return trace;
 		}
 
+		double Determinant() {
+        if (!IsSquare()) {
+            throw std::invalid_argument("Determinant is only defined for square matrices.");
+        }
+
+        int determinant = 0;
+        if (rows_ == 1 && cols_ == 1) {
+            determinant = matrix_[0][0];
+        } else if (rows_ == 2 && cols_ == 2) {
+            determinant = matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
+        } else {
+            for (int j = 0; j < cols_; j++) {
+                determinant += matrix_[0][j] * Cofactor(0, j);
+            }
+        }
+        return determinant;
+    }
+
+
+		Matrix CofactorMatrix(){
+			Matrix cofactorMatrix(rows_, cols_);
+			for(int i = 0; i < rows_; i++){
+				for(int j = 0; j < cols_; j++){
+					cofactorMatrix.matrix_[i][j]=Cofactor(i,j);
+				}
+			}
+			return cofactorMatrix;
+		}
+
+		Matrix AdjointMatrix(){
+			Matrix cofactorMatrix(rows_,cols_);
+			cofactorMatrix=CofactorMatrix();
+
+			return cofactorMatrix.Transpose();
+		}
+
+		Matrix InverseMatrix() {
+			if (!IsSquare()) {
+				throw std::invalid_argument("Inverse is only defined for square matrices.");
+			}
+
+			double determinant = Determinant();
+			if (determinant == 0) {
+				throw std::invalid_argument("Matrix is singular and cannot be inverted.");
+			}
+
+			Matrix adjointMatrix(cols_, rows_);
+			adjointMatrix = AdjointMatrix();
+
+			Matrix inverseMatrix(cols_, rows_);
+
+			for (int i = 0; i < cols_; ++i) {
+				for (int j = 0; j < rows_; ++j) {
+					inverseMatrix.matrix_[i][j] = adjointMatrix.matrix_[i][j] / determinant;
+				}
+			}
+			return inverseMatrix;
+    }
+
 	private:
 		void CheckSameDimensions(const Matrix& other) const {
 			if (rows_ != other.rows_ || cols_ != other.cols_) {
 				throw std::invalid_argument("Matrices must have the same dimensions.");
 			}
 		}
+
+		double Cofactor(int rowToRemove, int colToRemove) {
+			Matrix submatrix(rows_ - 1, cols_ - 1);
+			int submatrixRow = 0;
+			int submatrixCol = 0;
+
+			for (int i = 0; i < rows_; ++i) {
+				if (i == rowToRemove) continue;
+				submatrixCol = 0;
+				for (int j = 0; j < cols_; ++j) {
+					if (j == colToRemove) continue;
+					submatrix.matrix_[submatrixRow][submatrixCol] = matrix_[i][j];
+					++submatrixCol;
+				}
+				++submatrixRow;
+			}
+
+			return pow(-1, rowToRemove + colToRemove) * submatrix.Determinant();
+    }
 
 		double matrix_[kMax][kMax];
 		int rows_, cols_;
@@ -149,6 +228,10 @@ class MatrixCalculator {
 				<< "p. Scalar Product\n"
 				<< "t. Transpose\n"
 				<< "r. Trace\n"
+				<< "d. Determinant\n"
+				<< "c. Cofactor Matrix\n"
+				<< "j. Adjoint Matrix\n"
+				<< "i. Inverse Matrix\n"
 				<< "q. Quit\n"
 				<< "Choose an operation: ";
 			char operation;
@@ -171,7 +254,11 @@ class MatrixCalculator {
 										break;
 									}
 				case 't': matrix1.Transpose().Display(); break;
-				case 'r': matrix1.Trace(); break;
+				case 'r': std::cout<<matrix1.Trace()<<std::endl; break;
+				case 'd': std::cout<<matrix1.Determinant()<<std::endl; break;
+				case 'c': matrix1.CofactorMatrix().Display(); break;
+				case 'j': matrix1.AdjointMatrix().Display(); break;
+				case 'i': matrix1.InverseMatrix().Display(); break;
 				default: std::cout << "Invalid operation.\n"; break;
 			}
 		}
