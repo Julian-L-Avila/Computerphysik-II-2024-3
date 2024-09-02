@@ -121,22 +121,22 @@ class Matrix {
 		}
 
 		double Determinant() {
-        if (!IsSquare()) {
-            throw std::invalid_argument("Determinant is only defined for square matrices.");
-        }
+			if (!IsSquare()) {
+				throw std::invalid_argument("Determinant is only defined for square matrices.");
+			}
 
-        int determinant = 0;
-        if (rows_ == 1 && cols_ == 1) {
-            determinant = matrix_[0][0];
-        } else if (rows_ == 2 && cols_ == 2) {
-            determinant = matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
-        } else {
-            for (int j = 0; j < cols_; j++) {
-                determinant += matrix_[0][j] * Cofactor(0, j);
-            }
-        }
-        return determinant;
-    }
+			int determinant = 0;
+			if (rows_ == 1 && cols_ == 1) {
+				determinant = matrix_[0][0];
+			} else if (rows_ == 2 && cols_ == 2) {
+				determinant = matrix_[0][0] * matrix_[1][1] - matrix_[0][1] * matrix_[1][0];
+			} else {
+				for (int j = 0; j < cols_; j++) {
+					determinant += matrix_[0][j] * Cofactor(0, j);
+				}
+			}
+			return determinant;
+		}
 
 
 		Matrix CofactorMatrix(){
@@ -177,7 +177,7 @@ class Matrix {
 				}
 			}
 			return inverseMatrix;
-    }
+		}
 
 	private:
 		void CheckSameDimensions(const Matrix& other) const {
@@ -203,7 +203,7 @@ class Matrix {
 			}
 
 			return pow(-1, rowToRemove + colToRemove) * submatrix.Determinant();
-    }
+		}
 
 		double matrix_[kMax][kMax];
 		int rows_, cols_;
