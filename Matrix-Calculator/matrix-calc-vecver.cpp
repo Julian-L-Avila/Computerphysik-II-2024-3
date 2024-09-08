@@ -9,10 +9,6 @@ class Matrix {
 			if (rows <= 0 || cols <= 0) {
 				throw std::out_of_range("Invalid matrix dimensions.");
 			}
-			matrix_.reserve(rows);
-			for (int i = 0; i < rows; ++i) {
-				matrix_.emplace_back(cols, 0.0);
-			}
 			matrix_.resize(rows, std::vector<double>(cols, 0));
 		}
 
