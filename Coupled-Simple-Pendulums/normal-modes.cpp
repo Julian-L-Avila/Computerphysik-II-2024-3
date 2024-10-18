@@ -1,7 +1,8 @@
 #include <iostream>
+#include <vector>
 #include <eigen3/Eigen/Dense>
 
-constexpr int kSize = 8;
+constexpr int kSize = 5;
 constexpr double kGravity = 9.81;
 
 class MatrixInitializer {
@@ -36,9 +37,36 @@ auto BuildCoupledMatrix(const Eigen::MatrixXd& masses, const Eigen::MatrixXd& le
   return linear_system;
 }
 
+class SystemParameters {
+ public:
+  SystemParameters(int size, double lower_bound_masses, double upper_bound_masses,
+                   double lower_bound_lengths, double upper_bound_lengths,
+                   double lower_bound_springs, double upper_bound_springs)
+      : masses_initializer_(size, lower_bound_masses, upper_bound_masses),
+        lengths_initializer_(size, lower_bound_lengths, upper_bound_lengths),
+        springs_initializer_(size, lower_bound_springs, upper_bound_springs) {}
+
+  Eigen::MatrixXd GenerateMasses() const {
+    return masses_initializer_.RandomFill();
+  }
+
+  Eigen::MatrixXd GenerateLengths() const {
+    return lengths_initializer_.RandomFill();
+  }
+
+  Eigen::MatrixXd GenerateSprings() const {
+    return springs_initializer_.RandomFill();
+  }
+
+ private:
+  MatrixInitializer masses_initializer_;
+  MatrixInitializer lengths_initializer_;
+  MatrixInitializer springs_initializer_;
+};
+
+
 void ComputeEigenValuesAndVectors(const Eigen::MatrixXd& matrix) {
   Eigen::EigenSolver<Eigen::MatrixXd> solver(matrix);
-
   if (solver.info() != 0) {
     std::cerr << "Error computing eigenvalues and eigenvectors." << std::endl;
     return;
@@ -48,14 +76,40 @@ void ComputeEigenValuesAndVectors(const Eigen::MatrixXd& matrix) {
   std::cout << "Eigenvectors:\n" << solver.eigenvectors() << "\n";
 }
 
-int main() {
-  MatrixInitializer masses_initializer(kSize, 1.0, 2.0);
-  MatrixInitializer lengths_initializer(kSize, 1.0, 2.0);
-  MatrixInitializer springs_initializer(kSize, 0.5, 2.5);
+std::vector<double> CharacteristicPolinomial(const Eigen::MatrixXd& matrix) {
+  int n = matrix.rows();
 
-  const auto masses = masses_initializer.RandomFill();
-  const auto lengths = lengths_initializer.RandomFill();
-  const auto springs = springs_initializer.RandomFill();
+  Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n, n);
+
+  std::vector<double> p(n + 1);
+  std::vector<double> s(n + 1);
+
+  for (int i = 1; i <= n; ++i) {
+    I = I * matrix;
+    s[i] = I.trace();
+  }
+
+  p[0] = 1.0;
+  p[1] = -s[1];
+  for (int i = 2; i <= n; i++) {
+    p[i] = -s[i] / i;
+    for (int j = 1; j < i; j++) {
+      p[i] -= s[i - j] * p[j] / i;
+    }
+  }
+
+  for (int i = 0; i <= n; i++) {
+    std::cout << "x^" << n-i << ": " << p[i] << std::endl;
+  }
+  return p;
+}
+
+int main() {
+  SystemParameters system_params(kSize, 1.0, 2.0, 1.0, 2.0, 0.5, 2.5);
+
+  const auto masses = system_params.GenerateMasses();
+  const auto lengths = system_params.GenerateLengths();
+  const auto springs = system_params.GenerateSprings();
 
   const auto natural_frequencies_square = ComputeFrequencies(springs, masses, lengths);
 
@@ -66,6 +120,9 @@ int main() {
 
   const auto linear_system = BuildCoupledMatrix(masses, lengths, natural_frequencies_square);
   std::cout << "Linear System:\n" << linear_system << "\n";
+
+  std::cout << "Characteristic polynomial coefficients:" << std::endl;
+  std::vector<double> polynomial = CharacteristicPolinomial(linear_system);
 
   ComputeEigenValuesAndVectors(linear_system);
 
