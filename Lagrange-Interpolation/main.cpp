@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 
 const std::vector<double> test_points = {0.15, 3.15, 5.00, 7.95};
 
@@ -25,8 +26,6 @@ class DataLoader {
 			if (x_values.empty() || y_values.empty()) {
 				throw std::runtime_error("File is empty or data format is incorrect.");
 			}
-
-			file.close();
 		}
 };
 
@@ -76,6 +75,16 @@ class LagrangeInterpolator {
 			}
 			return result;
 		}
+
+		std::string CardinalNumeratorText(int index) const {
+			std::string l_i = "l_" + std::to_string(index) + "(x) = " + std::to_string(cardinal_denominators_[index]);
+			for (size_t i = 0; i < x_values_.size(); ++i) {
+				if (i != index) {
+					l_i += " * (x - " + std::to_string(x_values_[i]) + ")";
+				}
+			}
+			return l_i;
+		}
 };
 
 int main() {
@@ -95,11 +104,17 @@ int main() {
 	}
 
 	LagrangeInterpolator interpolator(x_values, y_values);
+	const std::vector<double> test_points = {0.15, 3.15, 5.00, 7.95};
 
-	for (const auto& target : test_points) {
+	for (double target : test_points) {
 		std::cout << "Interpolated value at x = " << target << ": "
 			<< interpolator.Interpolate(target) << '\n';
 	}
+
+	for (size_t i = 0; i < x_values.size(); ++i) {
+		std::cout << interpolator.CardinalNumeratorText(i) << '\n';
+	}
+
 	return 0;
 }
 
