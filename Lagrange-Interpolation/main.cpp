@@ -55,6 +55,24 @@ class LagrangeInterpolator {
 			return result;
 		}
 
+		std::string CardinalNumeratorText(int index) const {
+			std::string l_i = "l_" + std::to_string(index) + "(x) = (1.0 / " + std::to_string(cardinal_denominators_[index]) + ")";
+			for (size_t i = 0; i < x_values_.size(); ++i) {
+				if (i != index) {
+					l_i += " * (x - " + std::to_string(x_values_[i]) + ")";
+				}
+			}
+			return l_i;
+		}
+
+		std::string InterpolateText() const {
+			std::string L_x = "L(x) = 0.0 ";
+			for (size_t i = 0; i < y_values_.size(); ++i) {
+				L_x += "+ " + std::to_string(y_values_[i]) + " * l_" + std::to_string(i) + "(x) ";
+			}
+			return L_x;
+		}
+
 	public:
 		LagrangeInterpolator(const std::vector<double>& x, const std::vector<double>& y)
 			: x_values_(x), y_values_(y), cardinal_denominators_(x.size()) {
@@ -63,7 +81,7 @@ class LagrangeInterpolator {
 				}
 			}
 
-		double Interpolate(double target) const {
+		double Interpolate(double& target) const {
 			auto it = std::lower_bound(x_values_.begin(), x_values_.end(), target);
 			if (it != x_values_.end() && *it == target) {
 				return y_values_[std::distance(x_values_.begin(), it)];
@@ -76,14 +94,38 @@ class LagrangeInterpolator {
 			return result;
 		}
 
-		std::string CardinalNumeratorText(int index) const {
-			std::string l_i = "l_" + std::to_string(index) + "(x) = " + std::to_string(cardinal_denominators_[index]);
+		void GraphingScript(const std::string& data_path) {
+			const std::string plot_script = "./interpolation.gnu";
+
+			std::ofstream plot_file(plot_script);
+
+			plot_file << "set term qt" << '\n'
+				<< "set grid" << '\n'
+				<< "set style line 1 lw 4 ps 2" << "\n\n"
+				<< "set title 'Lagrange Cardinals'" << "\n\n";
+
 			for (size_t i = 0; i < x_values_.size(); ++i) {
-				if (i != index) {
-					l_i += " * (x - " + std::to_string(x_values_[i]) + ")";
-				}
+				plot_file << CardinalNumeratorText(i) << '\n';
 			}
-			return l_i;
+
+			plot_file << "\np '" << data_path << "' tit 'data', l_0(x)";
+
+			for (size_t i = 1; i < x_values_.size(); ++i) {
+				plot_file << ", l_" << std::to_string(i) << "(x)";
+			}
+
+			plot_file << "\npause -1" << '\n'
+				<< '\n' << InterpolateText() << '\n'
+				<< "set auto xy" << '\n'
+				<< "set title 'Interpolation Polynomial'" << '\n'
+				<< "\np '" << data_path << "' tit 'data', L(x) tit 'polynomial'" << '\n'
+				<< "pause -1";
+
+			plot_file.close();
+
+			std::string command = "gnuplot " + plot_script;
+
+			system(command.c_str());
 		}
 };
 
@@ -111,9 +153,7 @@ int main() {
 			<< interpolator.Interpolate(target) << '\n';
 	}
 
-	for (size_t i = 0; i < x_values.size(); ++i) {
-		std::cout << interpolator.CardinalNumeratorText(i) << '\n';
-	}
+	interpolator.GraphingScript(file_path);
 
 	return 0;
 }
