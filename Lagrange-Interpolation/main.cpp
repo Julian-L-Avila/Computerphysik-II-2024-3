@@ -11,7 +11,7 @@ const std::vector<double> interpolation_points = {0.15, 3.15, 5.00, 7.95};
 
 class DataLoader {
 	public:
-		void LoadData(const std::string& file_path, std::vector<double>& x_values, std::vector<double>& y_values) {
+		static void LoadData(const std::string& file_path, std::vector<double>& x_values, std::vector<double>& y_values) {
 			std::ifstream file(file_path);
 			if (!file.is_open()) {
 				throw std::runtime_error("Could not open file: " + file_path);
@@ -31,7 +31,7 @@ class DataLoader {
 
 class PlotScriptGenerator {
 	public:
-		std::string GenerateCardinalNumeratorsScript(const std::vector<double>& x_values, const std::vector<double>& cardinal_denominators) const {
+		static std::string GenerateCardinalNumeratorsScript(const std::vector<double>& x_values, const std::vector<double>& cardinal_denominators) {
 			std::ostringstream script;
 			for (size_t i = 0; i < x_values.size(); ++i) {
 				script << "l_" << i << "(x) = (1.0 / " << cardinal_denominators[i] << ")";
@@ -45,7 +45,7 @@ class PlotScriptGenerator {
 			return script.str();
 		}
 
-		std::string GenerateInterpolationPolynomialScript(const std::vector<double>& y_values) const {
+		static std::string GenerateInterpolationPolynomialScript(const std::vector<double>& y_values) {
 			std::ostringstream script;
 			script << "L(x) = 0.0 ";
 			for (size_t i = 0; i < y_values.size(); ++i) {
@@ -68,7 +68,7 @@ class LagrangeInterpolator {
 			}
 		}
 
-		double CardinalDenominator(int index) const {
+		double CardinalDenominator(size_t index) const {
 			double result = 1.0;
 			for (size_t i = 0; i < x_values_.size(); ++i) {
 				if (i != index) {
@@ -88,7 +88,7 @@ class LagrangeInterpolator {
 			return result;
 		}
 
-		std::vector<double> ExpandCardinalNumerator(int index) const {
+		std::vector<double> ExpandCardinalNumerator(size_t index) const {
 			std::vector<double> numerator = {1.0};
 			for (size_t i = 0; i < x_values_.size(); ++i) {
 				if (i != index) {
@@ -129,18 +129,19 @@ class LagrangeInterpolator {
 		}
 
 		void GenerateGraphingScript(const std::string& data_path, const std::string& interpolation_path) const {
-			PlotScriptGenerator plot_generator;
+			auto plot_script = PlotScriptGenerator::GenerateCardinalNumeratorsScript(x_values_, cardinal_denominators_);
+			auto interpolation_script = PlotScriptGenerator::GenerateInterpolationPolynomialScript(y_values_);
 
 			std::ofstream plot_file("./interpolation.gnu");
 			plot_file << "set term qt\nset grid\nset style line 1 lw 4 ps 2\n";
 			plot_file << "set title 'Lagrange Cardinals'\n\n";
-			plot_file << plot_generator.GenerateCardinalNumeratorsScript(x_values_, cardinal_denominators_);
+			plot_file << plot_script;
 			plot_file << "\np '" << data_path << "' tit 'data', l_0(x)";
 			for (size_t i = 1; i < x_values_.size(); ++i) {
 				plot_file << ", l_" << i << "(x)";
 			}
 			plot_file << "\npause -1\n";
-			plot_file << plot_generator.GenerateInterpolationPolynomialScript(y_values_) << "\n";
+			plot_file << interpolation_script << "\n";
 			plot_file << "set auto xy\nset title 'Interpolation Polynomial'\n";
 			plot_file << "\np '" << data_path << "' tit 'data', L(x) tit 'polynomial', '" << interpolation_path << "' tit 'interpolated'\n";
 			plot_file << "pause -1\n";
@@ -149,12 +150,13 @@ class LagrangeInterpolator {
 		void PrintExpandedPolynomial() const {
 			std::vector<double> polynomial(x_values_.size(), 0.0);
 			for (size_t i = 0; i < x_values_.size(); ++i) {
-				std::vector<double> numerator = ExpandCardinalNumerator(i);
+				auto numerator = ExpandCardinalNumerator(i);
 				double coefficient = y_values_[i] / cardinal_denominators_[i];
 				for (size_t j = 0; j < numerator.size(); ++j) {
 					polynomial[j] += numerator[j] * coefficient;
 				}
 			}
+
 			std::cout << "L(x) = ";
 			bool first = true;
 			for (size_t i = 0; i < polynomial.size(); ++i) {
@@ -176,7 +178,7 @@ int main() {
 
 	try {
 		std::vector<double> x_values, y_values;
-		DataLoader().LoadData(file_path, x_values, y_values);
+		DataLoader::LoadData(file_path, x_values, y_values);
 
 		std::cout << "Loaded Data:\n";
 		for (size_t i = 0; i < x_values.size(); ++i) {
@@ -205,3 +207,4 @@ int main() {
 
 	return 0;
 }
+
