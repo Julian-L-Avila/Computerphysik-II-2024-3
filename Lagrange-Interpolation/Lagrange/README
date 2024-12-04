@@ -1,0 +1,73 @@
+==============================
+LAGRANGE INTERPOLATION CALCULATOR
+==============================
+
+Author: J. L. Avila
+Contact: julianlavilam@gmail.com
+
+------------------------------------
+Overview
+------------------------------------
+This program calculates the **Lagrange interpolating polynomial** for a given
+dataset.
+Features:
+- Interpolation results for specified points.
+- Graphs of cardinal polynomial basis and the interpolating polynomial.
+- Visualization using Gnuplot.
+
+------------------------------------
+Requirements
+------------------------------------
+To run this program, you need:
+- Gnuplot installed on your system.
+- A C++ compiler (e.g., `g++`).
+
+------------------------------------
+How to Use
+------------------------------------
+1. **Prepare Input Data**
+- Save your dataset in a file named `data.dat`.
+Format: Each line should contain a pair of values (x, y), separated by a
+space.
+Example:
+```
+1.0 2.0
+2.0 4.0
+3.0 6.0
+```
+
+- Specify the points for interpolation by modifying the `interpolation_points`
+vector in `main.cpp`.
+Example:
+```cpp
+std::vector<double> interpolation_points = {1.5, 2.5};
+```
+
+2. **Compile the Program**
+Run the following command to compile `main.cpp`:
+g++ main.cpp -o main
+
+
+3. **Execute the Program**
+Run the compiled program:
+./main
+
+
+4. **View Graphs**
+The program generates graphs using Gnuplot. When prompted, press **ENTER** in
+the terminal to continue.
+
+5. **Check Output**
+Interpolated values are saved to `interpolated_values.dat`.
+
+------------------------------------
+Notes
+------------------------------------
+- Ensure Gnuplot is correctly installed and in your system's PATH.
+- Make sure `data.dat` is in the same directory as the program.
+
+------------------------------------
+Contact
+------------------------------------
+For questions or feedback, reach out to:
+julianlavilam@gmail.com
