@@ -5,14 +5,15 @@ set terminal cairolatex standalone size 25cm, 17.5cm
 set output 'scatter_plot.tex'
 
 # Set grid and labels for better visualization
+set auto xy
 set xlabel '\(X_1\)'
 set ylabel '\(X_2\)'
-set title 'Linear Congruential Generator'
+set title 'Lehmer Congruential'
 unset key
 
 # Load the data from the TSV file
 # Assumes the data has two columns: X and Y
-plot './Modulo-Generator/sequence.tsv' using 1:2 with points pt 7 ps 0.5
+plot './Lehmer-Method/sequence.tsv' using 1:2 with points pt 7 ps 0.5
 
 # End of the script
 
